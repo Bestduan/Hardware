@@ -4,16 +4,16 @@ module sqrt_pipelined #
     parameter UP   = BITS-1
 )
 (
-	input clk,
-	input [UP:0] x,
+	input         clk,
+	input  [UP:0] x,
 	output [UP:0] osqrt,
 	output [UP:0] odebug
 );
 
-reg [UP:0] cr [UP:0];
-reg [UP:0] crr [UP:0];
+reg [UP:0] cr   [UP:0];
+reg [UP:0] crr  [UP:0];
 reg [UP:0] _crr [UP:0];
-reg [UP:0] cx [UP:0];
+reg [UP:0] cx   [UP:0];
 
 `define BOUT (UP)	
 `define MEDI  (64'h0000000000000001<<(BITS-1))

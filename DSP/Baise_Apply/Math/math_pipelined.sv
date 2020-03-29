@@ -28,15 +28,15 @@ endmodule
 	
 module div_pipelined #
 (
-    parameter BITS= 48,
-    parameter UP= BITS-1,
-    parameter D_UP= 2*BITS-1
+    parameter BITS = 48,
+    parameter UP   = BITS-1,
+    parameter D_UP = 2*BITS-1
 )
 (
-	input clk,
-	input [D_UP:0] x,
-	input [UP:0] y,
-	output [UP:0] z
+	input           clk,
+	input  [D_UP:0] x,
+	input  [UP:0]   y,
+	output [UP:0]   z
 );
 
 reg [D_UP:0] cx [UP:0];
@@ -56,10 +56,10 @@ wire [D_UP:0] _uy= uy;
 
 always @*  begin
 	integer ind;
-	candidate[0]<= ux- (_uy<<UP);
+	candidate[0]<= ux - (_uy<<UP);
 	for (ind=0; ind< BITS-2 ; ind=ind+1) begin
 		_cy <= cy;
-		candidate[ind+1]<= cx[ind]- (_cy[ind]<<(BITS-2-ind));
+		candidate[ind+1]<= cx[ind] - (_cy[ind]<<(BITS-2-ind));
 	end
 end
 

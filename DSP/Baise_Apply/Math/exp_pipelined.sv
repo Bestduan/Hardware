@@ -1,19 +1,20 @@
 
-module exp_pipelined(
+module exp_pipelined#
+(
+	parameter ARG_HIGH  = 4,
+	parameter ARG_LOW   = 16,
+	parameter ARG_GUARD = 0,
+
+	parameter RES_HIGH  = 16,
+	parameter RES_LOW   = 16,
+	parameter RES_GUARD = 0
+)
+(
 	input clk,
 	input signed [ARG_HIGH+ ARG_LOW-1:0] ix,
 	output [RES_HIGH+ RES_LOW-1:0] oexp
-	);
+);
 
-parameter ARG_HIGH= 4;
-parameter ARG_LOW= 16;
-parameter ARG_GUARD= 0;
-
-parameter RES_HIGH= 16;
-parameter RES_LOW= 16;
-parameter RES_GUARD= 0;
-
-//	Внутренние константы, не переопределять.
 parameter A_BITS= ARG_HIGH+ ARG_LOW+ ARG_GUARD;
 parameter A_UP= A_BITS-1;
 
@@ -29,47 +30,34 @@ assign oexp= bexp[STEPS]>>RES_GUARD;
 `define LN2x64 (64'hB17217F7D1CF79AB)
 wire signed [63:0] C_LN_10001 [63:0];	//	Ln(1+1/2^x)
 
-always @( posedge clk ) 
-begin
+always @( posedge clk ) begin
 	integer ind;
 
 	x[0]<= ix<<<ARG_GUARD;
 	bexp[0]<= 64'h1<<(RES_LOW+RES_GUARD);
-	for (ind=0; ind<ARG_HIGH; ind++ )
-	begin
-		if ( x[ind]>(`LN2x64>>( 64-A_BITS+ind )) )
-		begin
-			x [ind+1]<= x[ind] - (`LN2x64>>( 64-A_BITS+ind ));
+	for (ind=0; ind<ARG_HIGH; ind++ ) begin
+		if ( x[ind]>(`LN2x64>>( 64-A_BITS+ind )) ) begin
+			 x[ind+1]<= x[ind] - (`LN2x64>>( 64-A_BITS+ind ));
 			bexp[ind+1]<= bexp[ind]<<(64'h1<<(ARG_HIGH-ind-1));
 		end
-		else
-		begin
+		else begin
 			x [ind+1]<= x [ind];
 			bexp[ind+1]<= bexp[ind];
 		end
 	end
-	for (ind=ARG_HIGH; ind<STEPS; ind++ )
-	begin
-		if ( x[ind]>(C_LN_10001[ind-ARG_HIGH]>>( 67-A_BITS )) )
-		begin
+	for (ind=ARG_HIGH; ind<STEPS; ind++ ) begin
+		if ( x[ind]>(C_LN_10001[ind-ARG_HIGH]>>( 67-A_BITS ))) begin
 			x [ind+1]<= x[ind] - (C_LN_10001[ind-ARG_HIGH]>>( 67-A_BITS ));
 			bexp[ind+1]<= bexp[ind] + (bexp[ind]>>(ind-ARG_HIGH+1));
 		end
-		else
-		begin
+		else begin
 			x [ind+1]<= x [ind];
 			bexp[ind+1]<= bexp[ind];
 		end
 	end
 end
 
-//	for ( i=0; i<64; i++){
-//		double dval= log(1+1./pow(2.,1+i)) * pow(2.,64.); //((long long)1 << i);
-//		unsigned long long val= i>30 ? 1ull<<(63-i) :dval;
-//		cout << "assign C_LN_10001[" << dec << i << "]= 64'h" << hex << val << ";" << endl;
-//	}
-
-assign C_LN_10001[0]= 64'h67cc8fb2fe613000;//	Точность первых понижена!
+assign C_LN_10001[0]= 64'h67cc8fb2fe613000;
 assign C_LN_10001[1]= 64'h391fef8f35344400;
 assign C_LN_10001[2]= 64'h1e27076e2af2e600;
 assign C_LN_10001[3]= 64'hf85186008b15300;

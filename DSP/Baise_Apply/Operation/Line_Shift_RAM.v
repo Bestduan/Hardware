@@ -6,8 +6,9 @@ module Line_Shift_RAM
 	parameter INPUT_WIDTH = 8
 )
 (
-	input	  					   clken, 
 	input	  					   clock,
+	input	  					   clken, 
+	input	  					   clr,
 	input	[INPUT_WIDTH - 1 : 0]  shiftin,
 	output	[INPUT_WIDTH - 1 : 0]  shiftout
 );
